@@ -214,7 +214,7 @@ def _parse_args():
     parser.add_argument(
         "--skip-files",
         action="store_true",
-        help="Do not write fock/two-electron/R1R2/energy output files.",
+        help="Do not write fock/two-electron/R1R2/energy/matrix output files.",
     )
     return parser.parse_args()
 
@@ -239,6 +239,53 @@ def _write_r1r2_like_file(path, vector, det_list, active_electrons):
         f.write("\n")
 
 
+def _format_matrix_value(value):
+    cval = complex(value)
+    if abs(cval.imag) <= 1e-12:
+        return f"{cval.real:.16e}"
+    return f"{cval.real:.16e}{cval.imag:+.16e}j"
+
+
+def _write_qsceom_matrix(path, matrix):
+    if path is None:
+        return
+
+    import numpy as np
+
+    out_path = Path(path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    arr = np.asarray(matrix)
+    lines = ["\t".join(_format_matrix_value(value) for value in row) for row in arr]
+    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"Wrote QSC-EOM Hamiltonian matrix M to: {out_path}")
+
+
+def _run_qsceom_with_matrix_output(matrix_file, qsceom_module, *args, **kwargs):
+    if matrix_file is None:
+        return qsceom_module.ee_exact(*args, **kwargs)
+
+    import numpy as np
+
+    original_eigh = np.linalg.eigh
+    captured = {"matrix": None}
+
+    def capture_eigh(matrix, *eigh_args, **eigh_kwargs):
+        if captured["matrix"] is None:
+            captured["matrix"] = matrix
+        return original_eigh(matrix, *eigh_args, **eigh_kwargs)
+
+    np.linalg.eigh = capture_eigh
+    try:
+        result = qsceom_module.ee_exact(*args, **kwargs)
+    finally:
+        np.linalg.eigh = original_eigh
+
+    if captured["matrix"] is None:
+        raise RuntimeError("QSC-EOM Hamiltonian matrix M was not captured.")
+    _write_qsceom_matrix(matrix_file, captured["matrix"])
+    return result
+
+
 def main():
     args = _parse_args()
     cfg = _default_problem()
@@ -259,6 +306,11 @@ def main():
     qscex_ene_file = None if args.skip_files else str(OUTPUT_DIR / "qsceom_energy")
     casci_file = None if args.skip_files else str(OUTPUT_DIR / "CASCI_output.txt")
     gap_file = None if args.skip_files else str(OUTPUT_DIR / "energy_gap_2_1Delta.txt")
+    matrix_file = (
+        None
+        if args.skip_files
+        else str(PROJECT_ROOT / "Hmatrix_CH+" / "qHMatrix(CH+1.5re_full_operator).txt")
+    )
 
     if run_scf:
         print("\n[1/3] Running SCF...")
@@ -340,7 +392,9 @@ def main():
         # until the target root is resolved.
         first_idx = 0 if target_idx is None else target_idx
         print("\n[3/3] Running QSC-EOM...")
-        eig, eigvecs, det_list = qsceom_exact.ee_exact(
+        eig, eigvecs, det_list = _run_qsceom_with_matrix_output(
+            matrix_file,
+            qsceom_exact,
             cfg["symbols"],
             cfg["geometry"],
             cfg["active_electrons"],

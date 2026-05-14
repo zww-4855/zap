@@ -16,6 +16,7 @@ import symm
 OUTPUT_DIR = PROJECT_ROOT / "outputs" / "CH+2re" / "CH+ Trotterized"
 AMP_FILE = OUTPUT_DIR / "t1_t2.txt"
 RVEC_DIR = OUTPUT_DIR / "r_vectors"
+MATRIX_FILE = PROJECT_ROOT / "Hmatrix_CH+" / "qHMatrix(CH+2re_r_vectors_only).txt"
 
 
 def _canon_pair(p, q):
@@ -85,6 +86,45 @@ def _write_r_vector_file(path, vector, det_list, active_electrons):
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _format_matrix_value(value):
+    cval = complex(value)
+    if abs(cval.imag) <= 1e-12:
+        return f"{cval.real:.16e}"
+    return f"{cval.real:.16e}{cval.imag:+.16e}j"
+
+
+def _write_qsceom_matrix(path, matrix):
+    import numpy as np
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    arr = np.asarray(matrix)
+    lines = ["\t".join(_format_matrix_value(value) for value in row) for row in arr]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"Wrote QSC-EOM Hamiltonian matrix M to: {path}")
+
+
+def _run_qsceom_with_matrix_output(qsceom_module, *args, **kwargs):
+    qsceom_module._require_quantum_deps()
+    original_eigh = qsceom_module.np.linalg.eigh
+    captured = {"matrix": None}
+
+    def capture_eigh(matrix, *eigh_args, **eigh_kwargs):
+        if captured["matrix"] is None:
+            captured["matrix"] = matrix
+        return original_eigh(matrix, *eigh_args, **eigh_kwargs)
+
+    qsceom_module.np.linalg.eigh = capture_eigh
+    try:
+        result = qsceom_module.ee_exact(*args, **kwargs)
+    finally:
+        qsceom_module.np.linalg.eigh = original_eigh
+
+    if captured["matrix"] is None:
+        raise RuntimeError("QSC-EOM Hamiltonian matrix M was not captured.")
+    _write_qsceom_matrix(MATRIX_FILE, captured["matrix"])
+    return result
+
+
 def main():
     if not AMP_FILE.exists():
         raise FileNotFoundError(f"Missing amplitude file: {AMP_FILE}")
@@ -107,7 +147,8 @@ def main():
     qubits = int(qubits)
     params = _load_params_from_t1_t2(cfg, qubits)
 
-    eigvals, eigvecs, det_list = qsceom.ee_exact(
+    eigvals, eigvecs, det_list = _run_qsceom_with_matrix_output(
+        qsceom,
         cfg["symbols"],
         cfg["geometry"],
         cfg["active_electrons"],
