@@ -1,0 +1,12 @@
+state_label	2^1Delta
+state_idx	28
+ground_energy_hartree	-37.824790668607
+excited_energy_hartree	-37.288526720452
+energy_difference_hartree	0.536263948155
+energy_difference_eV	14.59248542
+reference_ground_energy_hartree	-37.867464458898
+ground_state_error_hartree	0.042673790291
+ground_state_error_eV	1.16121299
+reference_excited_energy_hartree	-37.303528426956
+excited_state_error_hartree	0.015001706504
+excited_state_error_eV	0.40821723

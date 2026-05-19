@@ -70,7 +70,7 @@ def _creation_annihilation_mats(*, n_modes, wire_order, wire0_is_msb):
         parity_mask = parity_masks[p]
 
         for basis in range(dim):
-            parity = (basis & parity_mask).bit_count() & 1
+            parity = bin(basis & parity_mask).count("1") & 1
             sign = -1.0 if parity else 1.0
             occ = (basis >> bp) & 1
 
