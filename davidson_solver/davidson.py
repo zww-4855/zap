@@ -375,5 +375,10 @@ if __name__ == "__main__":
     # all tamps, C vectors are in (o,o,v,v) order
     eom_tdash6 = (1/36.0)*np.einsum("ijkabc,abcijk->",D3C3,C3.transpose(3,4,5,0,1,2),optimize="optimal")
     print("EOM [T-6] energy correction:",eom_tdash6)
-    sys.exit()
 
+    import projection_R3 as pr3
+    D2C2_eff =pr3.drive_eom_WnC1T2_to_T3(W,o,v,expanded_r1,expanded_r2,t2amps,D3)
+    sqr_brak_t_energy = 0.25*np.einsum('jiab,abji',D2C2_eff, expanded_r2.transpose(2,3,0,1))
+    print(f" EOM [T]-like energy<D2C2_eff|W|> = {sqr_brak_t_energy:.10f}")
+    
+    D2C2_WC1T2 = pr3.drive_eom_WnC1T2_to_T3(W,o,v,expanded_r1, expanded_r2,t2amps,D3)

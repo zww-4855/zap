@@ -78,3 +78,21 @@ def build_Q3_WnC2(W,C2,o,v):
     d3c3 = build_T3_secondO_spin(W,o,v,C2)
     fin_d3c3 = antisym_T3(d3c3,no,nv)
     return fin_d3c3
+
+
+
+### WILL NEED THIS FOR LITERALLY ALL OF THE REMAINING EOM TERMS
+def build_WT3_to_T3(W,o,v,T3):
+    rooovvv = 0.041666667 * np.einsum("ilmabc,jklm->ijkabc",T3,W[o,o,o,o],optimize="optimal")
+    rooovvv += -0.250000000 * np.einsum("ijlabd,kdlc->ijkabc",T3,W[o,v,o,v],optimize="optimal")
+    rooovvv += 0.041666667 * np.einsum("ijkade,debc->ijkabc",T3,W[v,v,v,v],optimize="optimal")
+    return rooovvv
+
+
+def build_WnC1T2_to_T3(W,o,v,C1,T2):
+    rooovvv = -0.250000000 * np.einsum("ijlm,la,kmbc->ijkabc",W[o,o,o,o],C1,T2,optimize="optimal")
+    rooovvv += -0.500000000 * np.einsum("idla,lb,jkcd->ijkabc",W[o,v,o,v],C1,T2,optimize="optimal")
+    rooovvv += -0.500000000 * np.einsum("idla,jd,klbc->ijkabc",W[o,v,o,v],C1,T2,optimize="optimal")
+    rooovvv += -0.250000000 * np.einsum("deab,id,jkce->ijkabc",W[v,v,v,v],C1,T2,optimize="optimal")
+    return rooovvv
+
