@@ -112,8 +112,18 @@ def build_WnC1T2_to_T3(W,o,v,C1,T2):
 def build_R3eff_to_R1(o,v,R3,T2):
     # build the R1 residual associated with the W*R3 term in the EOM   
     # R3 is in (o,o,o,v,v,v) order, T2 is in (o,o,v,v) order
-    T2dag = np.transpose(T2,(2,3,0,1))
-    D1R1 = 0.250000000 * np.einsum("ijkabc,bcjk->ia",R3,T2dag,optimize="optimal")
+    D1R1 = 0.250000000 * np.einsum("ijkabc,bcjk->ia",R3,T2.transpose(2,3,0,1),optimize="optimal")
     return D1R1
 
+def build_T2dagWT3_to_D1R1eff(T2, W, R3, o, v):
+    T2dag = T2.transpose(2,3,0,1)
+    rov = 0.125000000 * np.einsum("ijkabc,dejk,bcde->ia",R3,T2dag,W[v,v,v,v],optimize="optimal")
+    rov += -1.000000000 * np.einsum("ijkabc,bdjl,lckd->ia",R3,T2dag,W[o,v,o,v],optimize="optimal")
+    rov += 0.125000000 * np.einsum("ijkabc,bclm,lmjk->ia",R3,T2dag,W[o,o,o,o],optimize="optimal")
+    rov += -0.500000000 * np.einsum("jklabc,bdjk,icld->ia",R3,T2dag,W[o,v,o,v],optimize="optimal")
+    rov += -0.250000000 * np.einsum("jklabc,bcjm,imkl->ia",R3,T2dag,W[o,o,o,o],optimize="optimal")
+    rov += -0.250000000 * np.einsum("ijkbcd,bejk,cdae->ia",R3,T2dag,W[v,v,v,v],optimize="optimal")
+    rov += -0.500000000 * np.einsum("ijkbcd,bcjl,ldka->ia",R3,T2dag,W[o,v,o,v],optimize="optimal")
 
+    #rov += 0.125000000 * np.einsum("jklbcd,bcjk,idla->ia",R3,T2dag,W[o,v,o,v],optimize="optimal")
+    return -1*rov
