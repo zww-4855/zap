@@ -297,11 +297,3 @@ def reduce_r2(expanded_r2, nocc=6, nvirt=6, print_labels=False, check_antisymmet
     return np.array(small_r2, dtype=expanded_r2.dtype)
 
 
-def antisym_T2(Roovv, nocc, nvir):
-    # antisymmetrize the residual
-    Roovv_anti = np.zeros((nocc, nocc, nvir, nvir))
-    Roovv_anti += np.einsum("ijab->ijab", Roovv)
-    Roovv_anti -= np.einsum("ijab->jiab", Roovv)
-    Roovv_anti -= np.einsum("ijab->ijba", Roovv)
-    Roovv_anti += np.einsum("ijab->jiba", Roovv)
-    return Roovv_anti

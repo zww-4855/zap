@@ -1,5 +1,14 @@
 import numpy as np
 
+def antisym_T2(Roovv, nocc, nvir):
+    # antisymmetrize the residual
+    Roovv_anti = np.zeros((nocc, nocc, nvir, nvir))
+    Roovv_anti += np.einsum("ijab->ijab", Roovv)
+    Roovv_anti -= np.einsum("ijab->jiab", Roovv)
+    Roovv_anti -= np.einsum("ijab->ijba", Roovv)
+    Roovv_anti += np.einsum("ijab->jiba", Roovv)
+    return Roovv_anti
+
 def antisym_T3(Rooovvv, nocc, nvir):
     # antisymmetrize the residual
 
@@ -80,6 +89,10 @@ def build_Q3_WnC2(W,C2,o,v):
     return fin_d3c3
 
 
+def build_netT2_fromT3(g,o,v,t3):
+    roovv = -0.250000000 * np.einsum("iklabc,jckl->ijab",t3,g[o,v,o,o],optimize="optimal")
+    roovv += -0.250000000 * np.einsum("ijkacd,cdkb->ijab",t3,g[v,v,o,v],optimize="optimal")
+    return roovv
 
 ### WILL NEED THIS FOR LITERALLY ALL OF THE REMAINING EOM TERMS
 def build_WT3_to_T3(W,o,v,T3):
@@ -95,4 +108,12 @@ def build_WnC1T2_to_T3(W,o,v,C1,T2):
     rooovvv += -0.500000000 * np.einsum("idla,jd,klbc->ijkabc",W[o,v,o,v],C1,T2,optimize="optimal")
     rooovvv += -0.250000000 * np.einsum("deab,id,jkce->ijkabc",W[v,v,v,v],C1,T2,optimize="optimal")
     return rooovvv
+
+def build_R3eff_to_R1(o,v,R3,T2):
+    # build the R1 residual associated with the W*R3 term in the EOM   
+    # R3 is in (o,o,o,v,v,v) order, T2 is in (o,o,v,v) order
+    T2dag = np.transpose(T2,(2,3,0,1))
+    D1R1 = 0.250000000 * np.einsum("ijkabc,bcjk->ia",R3,T2dag,optimize="optimal")
+    return D1R1
+
 
