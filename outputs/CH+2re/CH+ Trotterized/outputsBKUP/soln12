@@ -1,0 +1,963 @@
+#INFO: **** input file is /Users/zwu/Desktop/work/bkup/zap/outputs/CH+2re/CH+ Trotterized/temp_run.py ****
+import itertools
+import pickle
+from pyscf.lib import logger
+from pyscf.data import nist
+import pycc
+import pyscf
+from pyscf import gto, mp, mcscf
+
+
+dist=[1.1285000000]
+dist=[2.2618409850]
+for num in dist:
+    atomString=f'H 0. 0. 0.0; C 0.0 0.0 {num}'
+    value=[]
+    basis='6-31G'
+    mol = pyscf.M(
+        atom=atomString,
+        verbose=5,
+        charge = 1,
+#        symmetry =True,
+        basis=basis)
+    mf = mol.RHF()
+
+    mf.run()
+#    from pyscf import mp
+#    mymp = mp.RMP2(mf).run()
+
+#    noons, natorbs = mcscf.addons.make_natural_orbitals(mymp)
+
+#    ncas, nelecas = (6,6)
+#    mycas = mcscf.CASCI(mf, ncas, nelecas)
+#    mycas.frozen = 2
+#    mycas.natorb = True
+
+#    mycas.kernel()
+
+    bkgrd_infile='fock.txt'
+    tamp_infile='t1_t2.txt'
+    tei_infile='two_elec.txt'
+
+    r_vec = 'r_vectors/r1_r2_soln12'
+    pycc.XaccCorrection('EOMT',bkgrd_infile,tamp_infile,tei_infile,ref="spin-orbitalEOM",eom_infile=r_vec) #xaccObj)
+#INFO: ******************** input file end ********************
+
+
+System: uname_result(system='Darwin', node='mac149279', release='25.4.0', version='Darwin Kernel Version 25.4.0: Thu Mar 19 19:32:59 PDT 2026; root:xnu-12377.101.15~1/RELEASE_ARM64_T8122', machine='arm64', processor='arm')  Threads 1
+Python 3.8.20 (default, Oct  3 2024, 10:22:23) 
+[Clang 14.0.6 ]
+numpy 1.24.4  scipy 1.10.1  h5py 3.11.0
+Date: Thu May  7 08:46:59 2026
+PySCF version 2.13.0
+PySCF path  /Users/zwu/Desktop/work/bkup/pycc/.venv/lib/python3.8/site-packages/pyscf
+
+[CONFIG] conf_file None
+[INPUT] verbose = 5
+[INPUT] max_memory = 4000 
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 6
+[INPUT] charge = 1
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry False subgroup None
+[INPUT] Mole.unit = angstrom
+[INPUT] Symbol           X                Y                Z      unit          X                Y                Z       unit  Magmom
+[INPUT]  1 H      0.000000000000   0.000000000000   0.000000000000 AA    0.000000000000   0.000000000000   0.000000000000 Bohr   0.0
+[INPUT]  2 C      0.000000000000   0.000000000000   2.261840985000 AA    0.000000000000   0.000000000000   4.274259998966 Bohr   0.0
+[INPUT] ---------------- BASIS SET ---------------- 
+[INPUT] l, kappa, [nprim/nctr], expnt,             c_1 c_2 ...
+[INPUT] H
+[INPUT] 0    0    [3    /1   ]  18.731137         0.0334946
+                                2.8253937         0.23472695
+                                0.6401217         0.81375733
+[INPUT] 0    0    [1    /1   ]  0.1612778            1
+[INPUT] C
+[INPUT] 0    0    [6    /1   ]  3047.5249         0.0018347
+                                457.36951         0.0140373
+                                103.94869         0.0688426
+                                29.210155         0.2321844
+                                9.286663          0.4679413
+                                3.163927          0.362312
+[INPUT] 0    0    [3    /1   ]  7.8682724         -0.1193324
+                                1.8812885         -0.1608542
+                                0.5442493         1.1434564
+[INPUT] 0    0    [1    /1   ]  0.1687144            1
+[INPUT] 1    0    [3    /1   ]  7.8682724         0.0689991
+                                1.8812885         0.316424
+                                0.5442493         0.7443083
+[INPUT] 1    0    [1    /1   ]  0.1687144            1
+
+nuclear repulsion = 1.4037517608781
+number of shells = 7
+number of NR pGTOs = 26
+number of NR cGTOs = 11
+basis = 6-31G
+ecp = {}
+CPU time:         3.52
+
+
+******** <class 'pyscf.scf.hf.RHF'> ********
+method = RHF
+initial guess = minao
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+diis_damp = 0
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /var/folders/yy/5bdyxkr12tgclq2rr66hj0m00000gp/T/tmpfgud9z0z
+max_memory 4000 MB (current use 0 MB)
+Set gradient conv threshold to 3.16228e-05
+Initial guess from minao.
+E1 = -54.0081590601597  E_coul = 14.990404408628429
+init E= -37.6140028906532
+cond(S) = 13.00853558074417
+    CPU time for initialize scf      0.03 sec, wall time      0.02 sec
+  HOMO = -0.198052134208716  LUMO = -0.0342269858639082
+  mo_energy =
+[-11.23871818  -0.68089183  -0.19805213  -0.03422699  -0.03422699
+   0.0145204    0.80407636   0.80407636   0.80444952   0.88392213
+   1.07044322]
+E1 = -48.838623721262046  E_coul = 10.016437714856334
+cycle= 1 E= -37.4184342455276  delta_E= 0.196  |g|= 0.565  |ddm|= 1.06
+    CPU time for cycle= 1      0.01 sec, wall time      0.00 sec
+  HOMO = -0.736094142617428  LUMO = -0.620161927805184
+  mo_energy =
+[-12.47301234  -1.41179843  -0.73609414  -0.62016193  -0.62016193
+  -0.3313048    0.17569352   0.17970743   0.17970743   0.33465629
+   1.0289138 ]
+E1 = -52.07767606616483  E_coul = 13.007045081054962
+cycle= 2 E= -37.6668792242318  delta_E= -0.248  |g|= 0.345  |ddm|= 1.49
+    CPU time for cycle= 2      0.01 sec, wall time      0.00 sec
+  HOMO = -0.662174803392378  LUMO = -0.335450176671225
+  mo_energy =
+[-11.85248669  -1.11558256  -0.6621748   -0.33545018  -0.30874325
+  -0.30874325   0.41917625   0.41917625   0.42260569   0.47543431
+   0.76840023]
+E1 = -51.27639696316575  E_coul = 12.148181697916677
+cycle= 3 E= -37.724463504371  delta_E= -0.0576  |g|= 0.0703  |ddm|= 0.426
+    CPU time for cycle= 3      0.01 sec, wall time      0.00 sec
+  HOMO = -0.690495974408205  LUMO = -0.321958460531012
+  mo_energy =
+[-11.82214451  -1.08672353  -0.69049597  -0.32195846  -0.27903606
+  -0.27903606   0.44557127   0.44557127   0.46001655   0.49241351
+   0.71539705]
+E1 = -51.09314658621949  E_coul = 11.962511669502122
+cycle= 4 E= -37.7268831558393  delta_E= -0.00242  |g|= 0.00659  |ddm|= 0.0924
+    CPU time for cycle= 4      0.03 sec, wall time      0.00 sec
+  HOMO = -0.689605584952856  LUMO = -0.32136309556213
+  mo_energy =
+[-11.8143712   -1.08244785  -0.68960558  -0.3213631   -0.27542727
+  -0.27542727   0.44888597   0.44888597   0.46344189   0.49367685
+   0.71337344]
+E1 = -51.08276511106544  E_coul = 11.952106384551737
+cycle= 5 E= -37.7269069656356  delta_E= -2.38e-05  |g|= 0.00107  |ddm|= 0.0119
+    CPU time for cycle= 5      0.05 sec, wall time      0.01 sec
+  HOMO = -0.689743294142667  LUMO = -0.321432067414618
+  mo_energy =
+[-11.81550846  -1.08299843  -0.68974329  -0.32143207  -0.27602462
+  -0.27602462   0.44833351   0.44833351   0.46295386   0.49334117
+   0.71398015]
+E1 = -51.085375864921026  E_coul = 11.954716431065734
+cycle= 6 E= -37.7269076729772  delta_E= -7.07e-07  |g|= 0.000105  |ddm|= 0.00192
+    CPU time for cycle= 6      0.02 sec, wall time      0.00 sec
+  HOMO = -0.68974315609527  LUMO = -0.321453756200594
+  mo_energy =
+[-11.81541113  -1.0829435   -0.68974316  -0.32145376  -0.27598182
+  -0.27598182   0.44837403   0.44837403   0.46299366   0.49334732
+   0.71391066]
+E1 = -51.08517365824301  E_coul = 11.954514218500924
+cycle= 7 E= -37.726907678864  delta_E= -5.89e-09  |g|= 9.31e-06  |ddm|= 0.00017
+    CPU time for cycle= 7      0.01 sec, wall time      0.00 sec
+  HOMO = -0.689745547291891  LUMO = -0.321451467961076
+  mo_energy =
+[-11.81540251  -1.08293859  -0.68974555  -0.32145147  -0.27597736
+  -0.27597736   0.44837823   0.44837823   0.46299857   0.49334932
+   0.71390625]
+E1 = -51.08515168800921  E_coul = 11.954492248222984
+cycle= 8 E= -37.7269076789081  delta_E= -4.41e-11  |g|= 1.11e-06  |ddm|= 1.36e-05
+    CPU time for cycle= 8      0.02 sec, wall time      0.00 sec
+  HOMO = -0.689745495091317  LUMO = -0.321451493608727
+  mo_energy =
+[-11.81540051  -1.08293759  -0.6897455   -0.32145149  -0.27597639
+  -0.27597639   0.44837917   0.44837917   0.46299946   0.49334986
+   0.71390527]
+E1 = -51.08514892055069  E_coul = 11.954489480764
+Extra cycle  E= -37.7269076789086  delta_E= -4.55e-13  |g|= 2.63e-07  |ddm|= 2e-06
+    CPU time for scf_cycle      0.19 sec, wall time      0.04 sec
+    CPU time for SCF      0.19 sec, wall time      0.04 sec
+converged SCF energy = -37.7269076789086
+Ref is:: spin-orbitalEOM fock.txt
+FXN read_bkgrd info: 6 6
+eps and mo_energies: [-11.81540051, -1.08293759, -0.6897455, -0.32145149, -0.27597639, -0.27597639] 6 6
+nocc nvirt: 6 6
+o & v slice(None, 6, None) slice(6, None, None)
+eps: [-11.81540051 -11.81540051  -1.08293759  -1.08293759  -0.6897455
+  -0.6897455   -0.32145149  -0.32145149  -0.27597639  -0.27597639
+  -0.27597639  -0.27597639]
+shapes: (6, 6, 6, 6, 6, 6) slice(None, 6, None) slice(6, None, None) None [-11.81540051 -11.81540051  -1.08293759  -1.08293759  -0.6897455
+  -0.6897455   -0.32145149  -0.32145149  -0.27597639  -0.27597639
+  -0.27597639  -0.27597639] (12,)
+shape of denoms: (6, 6, 6, 6, 6, 6)
+reading tamp file: r_vectors/r1_r2_soln12
+op list: [6, 0] amp key: 3.40721577524904e-07
+nocc: 6
+operator list t1: [6, 0]
+t1shape: (6, 6)
+op list: [8, 0] amp key: 7.023262902035703e-08
+nocc: 6
+operator list t1: [8, 0]
+t1shape: (6, 6)
+op list: [10, 0] amp key: 0.0003071379942546896
+nocc: 6
+operator list t1: [10, 0]
+t1shape: (6, 6)
+op list: [7, 1] amp key: -3.323903524777682e-07
+nocc: 6
+operator list t1: [7, 1]
+t1shape: (6, 6)
+op list: [9, 1] amp key: -7.513081852247969e-08
+nocc: 6
+operator list t1: [9, 1]
+t1shape: (6, 6)
+op list: [11, 1] amp key: -0.00030714361243273024
+nocc: 6
+operator list t1: [11, 1]
+t1shape: (6, 6)
+op list: [6, 2] amp key: -4.3256910983063094e-05
+nocc: 6
+operator list t1: [6, 2]
+t1shape: (6, 6)
+op list: [8, 2] amp key: -1.5919275217869363e-05
+nocc: 6
+operator list t1: [8, 2]
+t1shape: (6, 6)
+op list: [10, 2] amp key: -0.06679998746274687
+nocc: 6
+operator list t1: [10, 2]
+t1shape: (6, 6)
+op list: [7, 3] amp key: 4.770132928072337e-05
+nocc: 6
+operator list t1: [7, 3]
+t1shape: (6, 6)
+op list: [9, 3] amp key: 1.4164779402616948e-05
+nocc: 6
+operator list t1: [9, 3]
+t1shape: (6, 6)
+op list: [11, 3] amp key: 0.06679503757685823
+nocc: 6
+operator list t1: [11, 3]
+t1shape: (6, 6)
+op list: [6, 4] amp key: 0.0003532356110008131
+nocc: 6
+operator list t1: [6, 4]
+t1shape: (6, 6)
+op list: [8, 4] amp key: 7.501721158883578e-05
+nocc: 6
+operator list t1: [8, 4]
+t1shape: (6, 6)
+op list: [10, 4] amp key: 0.3260524551501231
+nocc: 6
+operator list t1: [10, 4]
+t1shape: (6, 6)
+op list: [7, 5] amp key: -0.0003550679292966962
+nocc: 6
+operator list t1: [7, 5]
+t1shape: (6, 6)
+op list: [9, 5] amp key: -7.485586432473714e-05
+nocc: 6
+operator list t1: [9, 5]
+t1shape: (6, 6)
+op list: [11, 5] amp key: -0.32605218012705595
+nocc: 6
+operator list t1: [11, 5]
+t1shape: (6, 6)
+op list: [6, 0, 7, 1] amp key: 1.3119542317317052e-08
+op list: 6 0 7 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 9, 1] amp key: -2.981440780747775e-08
+op list: 6 0 9 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 11, 1] amp key: -0.0001302743237190573
+op list: 6 0 11 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 7, 1] amp key: 2.943045836531201e-08
+op list: 8 0 7 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 9, 1] amp key: 7.396336910040564e-08
+op list: 8 0 9 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 11, 1] amp key: 2.8578785197727608e-09
+op list: 8 0 11 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 7, 1] amp key: 0.0001302730525530983
+op list: 10 0 7 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 9, 1] amp key: -6.030445152569938e-10
+op list: 10 0 9 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 11, 1] amp key: 8.443603931590556e-08
+op list: 10 0 11 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 8, 2] amp key: -4.234968266599915e-09
+op list: 6 0 8 2
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 10, 2] amp key: -1.8249541339159816e-05
+op list: 6 0 10 2
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 10, 2] amp key: -1.899470680567848e-08
+op list: 8 0 10 2
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 7, 3] amp key: 1.968802954011446e-07
+op list: 6 0 7 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 9, 3] amp key: -7.317770875028698e-08
+op list: 6 0 9 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 11, 3] amp key: -0.0003130020862466272
+op list: 6 0 11 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 7, 3] amp key: 7.381825302664194e-08
+op list: 8 0 7 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 9, 3] amp key: 2.6096614757196274e-07
+op list: 8 0 9 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 11, 3] amp key: 2.116889722881449e-08
+op list: 8 0 11 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 7, 3] amp key: 0.00033124775947899603
+op list: 10 0 7 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 9, 3] amp key: 4.0717349655585597e-10
+op list: 10 0 9 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 11, 3] amp key: 2.8048038832708724e-07
+op list: 10 0 11 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 8, 4] amp key: -7.505555059928557e-09
+op list: 6 0 8 4
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 10, 4] amp key: -2.2267254453637755e-05
+op list: 6 0 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 10, 4] amp key: 6.948293306190143e-08
+op list: 8 0 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 7, 5] amp key: 2.60762526978683e-07
+op list: 6 0 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 9, 5] amp key: 9.8823445871703e-08
+op list: 6 0 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0, 11, 5] amp key: 0.0004802599952807345
+op list: 6 0 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 7, 5] amp key: -1.0885835729544407e-07
+op list: 8 0 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 9, 5] amp key: -3.9303624896124404e-07
+op list: 8 0 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 0, 11, 5] amp key: -1.044383004907943e-07
+op list: 8 0 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 7, 5] amp key: -0.000457983798286184
+op list: 10 0 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 9, 5] amp key: -4.05917966216751e-08
+op list: 10 0 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 0, 11, 5] amp key: -3.449907567629639e-07
+op list: 10 0 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 6, 2] amp key: -1.9899162461606337e-07
+op list: 7 1 6 2
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 8, 2] amp key: -6.785950787456624e-08
+op list: 7 1 8 2
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 10, 2] amp key: -0.0003129994928095151
+op list: 7 1 10 2
+t2 dim: (6, 6, 6, 6)
+op list: [9, 1, 6, 2] amp key: 7.93105022371917e-08
+op list: 9 1 6 2
+t2 dim: (6, 6, 6, 6)
+op list: [9, 1, 8, 2] amp key: -2.6488117219940335e-07
+op list: 9 1 8 2
+t2 dim: (6, 6, 6, 6)
+op list: [9, 1, 10, 2] amp key: 2.439034438487085e-08
+op list: 9 1 10 2
+t2 dim: (6, 6, 6, 6)
+op list: [11, 1, 6, 2] amp key: 0.0003312531820261197
+op list: 11 1 6 2
+t2 dim: (6, 6, 6, 6)
+op list: [11, 1, 8, 2] amp key: -1.0590674142988483e-09
+op list: 11 1 8 2
+t2 dim: (6, 6, 6, 6)
+op list: [11, 1, 10, 2] amp key: -2.8102985808999543e-07
+op list: 11 1 10 2
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 9, 3] amp key: -5.885737986722954e-09
+op list: 7 1 9 3
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 11, 3] amp key: -1.8249857346366607e-05
+op list: 7 1 11 3
+t2 dim: (6, 6, 6, 6)
+op list: [9, 1, 11, 3] amp key: -1.7332547529044578e-08
+op list: 9 1 11 3
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 6, 4] amp key: -2.648376995499508e-07
+op list: 7 1 6 4
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 8, 4] amp key: 1.0409393310192688e-07
+op list: 7 1 8 4
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 10, 4] amp key: 0.00048023044307991916
+op list: 7 1 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [9, 1, 6, 4] amp key: -1.1469562540306756e-07
+op list: 9 1 6 4
+t2 dim: (6, 6, 6, 6)
+op list: [9, 1, 8, 4] amp key: 4.138791658253712e-07
+op list: 9 1 8 4
+t2 dim: (6, 6, 6, 6)
+op list: [9, 1, 10, 4] amp key: -1.0856745171604793e-07
+op list: 9 1 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [11, 1, 6, 4] amp key: -0.0004579525286201394
+op list: 11 1 6 4
+t2 dim: (6, 6, 6, 6)
+op list: [11, 1, 8, 4] amp key: -3.3280875826735995e-08
+op list: 11 1 8 4
+t2 dim: (6, 6, 6, 6)
+op list: [11, 1, 10, 4] amp key: 3.364157226134042e-07
+op list: 11 1 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 9, 5] amp key: -1.0496009943260227e-09
+op list: 7 1 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [7, 1, 11, 5] amp key: -2.2286847194757256e-05
+op list: 7 1 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [9, 1, 11, 5] amp key: 7.255893456983282e-08
+op list: 9 1 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 2, 7, 3] amp key: -3.3869192018153215e-06
+op list: 6 2 7 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 2, 9, 3] amp key: -9.104010743085073e-06
+op list: 6 2 9 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 2, 11, 3] amp key: -0.039108900305848994
+op list: 6 2 11 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 2, 7, 3] amp key: 8.82909912524215e-06
+op list: 8 2 7 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 2, 9, 3] amp key: 2.764019978207961e-05
+op list: 8 2 9 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 2, 11, 3] amp key: -2.608818396382929e-07
+op list: 8 2 11 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 2, 7, 3] amp key: 0.03910914727264651
+op list: 10 2 7 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 2, 9, 3] amp key: 1.000456028520566e-07
+op list: 10 2 9 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 2, 11, 3] amp key: 3.2607952538554016e-05
+op list: 10 2 11 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 2, 8, 4] amp key: 6.771977856535983e-06
+op list: 6 2 8 4
+t2 dim: (6, 6, 6, 6)
+op list: [6, 2, 10, 4] amp key: 0.03181016472363748
+op list: 6 2 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [8, 2, 10, 4] amp key: -1.990602878928917e-05
+op list: 8 2 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [6, 2, 7, 5] amp key: -1.846899747958791e-05
+op list: 6 2 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 2, 9, 5] amp key: -1.0882906518919445e-05
+op list: 6 2 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 2, 11, 5] amp key: -0.04160448917805635
+op list: 6 2 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 2, 7, 5] amp key: 1.5653071397314416e-06
+op list: 8 2 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 2, 9, 5] amp key: 2.0830629221987186e-05
+op list: 8 2 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 2, 11, 5] amp key: -1.9201759901262176e-05
+op list: 8 2 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 2, 7, 5] amp key: 0.00980387431781597
+op list: 10 2 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 2, 9, 5] amp key: -1.856554439567479e-05
+op list: 10 2 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 2, 11, 5] amp key: 2.2703609363826013e-05
+op list: 10 2 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [7, 3, 6, 4] amp key: 2.0576434666432876e-05
+op list: 7 3 6 4
+t2 dim: (6, 6, 6, 6)
+op list: [7, 3, 8, 4] amp key: -1.0831707212836876e-05
+op list: 7 3 8 4
+t2 dim: (6, 6, 6, 6)
+op list: [7, 3, 10, 4] amp key: -0.04160500678844168
+op list: 7 3 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [9, 3, 6, 4] amp key: 8.889010788839855e-07
+op list: 9 3 6 4
+t2 dim: (6, 6, 6, 6)
+op list: [9, 3, 8, 4] amp key: -1.8883880202045723e-05
+op list: 9 3 8 4
+t2 dim: (6, 6, 6, 6)
+op list: [9, 3, 10, 4] amp key: -1.9924282341660784e-05
+op list: 9 3 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [11, 3, 6, 4] amp key: 0.009786325883371456
+op list: 11 3 6 4
+t2 dim: (6, 6, 6, 6)
+op list: [11, 3, 8, 4] amp key: -1.7900515473471167e-05
+op list: 11 3 8 4
+t2 dim: (6, 6, 6, 6)
+op list: [11, 3, 10, 4] amp key: -2.388208424318886e-05
+op list: 11 3 10 4
+t2 dim: (6, 6, 6, 6)
+op list: [7, 3, 9, 5] amp key: 7.176383982610628e-06
+op list: 7 3 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [7, 3, 11, 5] amp key: 0.03180912561811814
+op list: 7 3 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [9, 3, 11, 5] amp key: -1.98001877443148e-05
+op list: 9 3 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 4, 7, 5] amp key: 0.0004225862212980852
+op list: 6 4 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 4, 9, 5] amp key: 0.0001429611515215064
+op list: 6 4 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 4, 11, 5] amp key: 0.6203719507384327
+op list: 6 4 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 4, 7, 5] amp key: -0.00014349492253931328
+op list: 8 4 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 4, 9, 5] amp key: -0.0003710836319197358
+op list: 8 4 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 4, 11, 5] amp key: 3.824753747938775e-06
+op list: 8 4 11 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 4, 7, 5] amp key: -0.6203674231524551
+op list: 10 4 7 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 4, 9, 5] amp key: -6.789059579995552e-06
+op list: 10 4 9 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 4, 11, 5] amp key: -0.00041419465600080196
+op list: 10 4 11 5
+t2 dim: (6, 6, 6, 6)
+reading tamp file: t1_t2.txt
+op list: [6, 7, 0, 1] amp key: 0.0004064860016376623
+op list: 6 7 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 0, 1] amp key: -1.1729949439571405e-06
+op list: 6 9 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 0, 1] amp key: -1.1353611614080702e-06
+op list: 6 11 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 0, 1] amp key: 3.2283603209749503e-07
+op list: 8 7 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 0, 1] amp key: 4.5440360861132655e-07
+op list: 10 7 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 0, 1] amp key: 0.0008408442685989878
+op list: 8 9 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 0, 1] amp key: 1.1783601312085595e-06
+op list: 8 11 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 0, 1] amp key: -6.727002814008826e-07
+op list: 10 9 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 0, 1] amp key: 0.0008266234469824655
+op list: 10 11 0 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 8, 0, 2] amp key: -6.034804761392513e-07
+op list: 6 8 0 2
+t2 dim: (6, 6, 6, 6)
+op list: [6, 10, 0, 2] amp key: -2.1664943615660506e-06
+op list: 6 10 0 2
+t2 dim: (6, 6, 6, 6)
+op list: [8, 10, 0, 2] amp key: 3.5715203502445386e-07
+op list: 8 10 0 2
+t2 dim: (6, 6, 6, 6)
+op list: [6, 7, 0, 3] amp key: 0.0008828228522050217
+op list: 6 7 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 0, 3] amp key: -7.632437336080225e-07
+op list: 6 9 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 0, 3] amp key: 2.2266079557529113e-07
+op list: 6 11 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 0, 3] amp key: -1.8449758740501554e-06
+op list: 8 7 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 0, 3] amp key: -6.495320365993375e-08
+op list: 10 7 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 0, 3] amp key: 0.003215539223199892
+op list: 8 9 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 0, 3] amp key: 7.90524578965951e-07
+op list: 8 11 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 0, 3] amp key: 2.3885522485262725e-06
+op list: 10 9 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 0, 3] amp key: 0.0032114531027307744
+op list: 10 11 0 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 8, 0, 4] amp key: -4.974652479405597e-07
+op list: 6 8 0 4
+t2 dim: (6, 6, 6, 6)
+op list: [6, 10, 0, 4] amp key: -5.522241748873842e-07
+op list: 6 10 0 4
+t2 dim: (6, 6, 6, 6)
+op list: [8, 10, 0, 4] amp key: 1.934109528204495e-06
+op list: 8 10 0 4
+t2 dim: (6, 6, 6, 6)
+op list: [6, 7, 0, 5] amp key: 0.0002878828467978102
+op list: 6 7 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 0, 5] amp key: -1.968006475147634e-06
+op list: 6 9 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 0, 5] amp key: 9.930286448630323e-07
+op list: 6 11 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 0, 5] amp key: -9.928300964761553e-07
+op list: 8 7 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 0, 5] amp key: 8.493337749738708e-07
+op list: 10 7 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 0, 5] amp key: -0.0003421581063602119
+op list: 8 9 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 0, 5] amp key: 1.5911127604623582e-06
+op list: 8 11 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 0, 5] amp key: -2.473851706620327e-06
+op list: 10 9 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 0, 5] amp key: -0.0003356157140202888
+op list: 10 11 0 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 7, 2, 1] amp key: 0.0008821594952413292
+op list: 6 7 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 2, 1] amp key: 1.614004463471357e-07
+op list: 6 9 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 2, 1] amp key: -3.053124488348479e-06
+op list: 6 11 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 2, 1] amp key: 7.947886293477411e-07
+op list: 8 7 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 2, 1] amp key: 6.475415329108814e-07
+op list: 10 7 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 2, 1] amp key: 0.0032126329427959854
+op list: 8 9 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 2, 1] amp key: -4.897571981463035e-07
+op list: 8 11 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 2, 1] amp key: -5.858260749793879e-07
+op list: 10 9 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 2, 1] amp key: 0.0032117950382051503
+op list: 10 11 2 1
+t2 dim: (6, 6, 6, 6)
+op list: [7, 9, 1, 3] amp key: -1.8317199303759088e-06
+op list: 7 9 1 3
+t2 dim: (6, 6, 6, 6)
+op list: [7, 11, 1, 3] amp key: 3.7272701797803714e-07
+op list: 7 11 1 3
+t2 dim: (6, 6, 6, 6)
+op list: [9, 11, 1, 3] amp key: 1.5484333692642466e-06
+op list: 9 11 1 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 7, 4, 1] amp key: 0.00028387725565275963
+op list: 6 7 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 4, 1] amp key: -2.035921416367793e-06
+op list: 6 9 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 4, 1] amp key: 1.3643813322593606e-07
+op list: 6 11 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 4, 1] amp key: 9.200951675401175e-07
+op list: 8 7 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 4, 1] amp key: 1.8707407161113357e-06
+op list: 10 7 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 4, 1] amp key: -0.00034133605058262427
+op list: 8 9 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 4, 1] amp key: -3.372167345349892e-07
+op list: 8 11 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 4, 1] amp key: -1.5140841133199249e-06
+op list: 10 9 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 4, 1] amp key: -0.0003383414032107443
+op list: 10 11 4 1
+t2 dim: (6, 6, 6, 6)
+op list: [7, 9, 1, 5] amp key: 6.835832709349069e-07
+op list: 7 9 1 5
+t2 dim: (6, 6, 6, 6)
+op list: [7, 11, 1, 5] amp key: 3.2828924605107683e-07
+op list: 7 11 1 5
+t2 dim: (6, 6, 6, 6)
+op list: [9, 11, 1, 5] amp key: -1.0490341946917896e-06
+op list: 9 11 1 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 7, 2, 3] amp key: 0.035472128987433904
+op list: 6 7 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 2, 3] amp key: 3.147270530327421e-06
+op list: 6 9 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 2, 3] amp key: 8.253643126331096e-06
+op list: 6 11 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 2, 3] amp key: 1.6292454118345247e-07
+op list: 8 7 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 2, 3] amp key: -1.4211553651248105e-05
+op list: 10 7 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 2, 3] amp key: 0.2501200871298903
+op list: 8 9 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 2, 3] amp key: 1.6194262038541823e-05
+op list: 8 11 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 2, 3] amp key: -1.3548729673864519e-05
+op list: 10 9 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 2, 3] amp key: 0.2519569020890368
+op list: 10 11 2 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 8, 2, 4] amp key: 9.779623148231093e-06
+op list: 6 8 2 4
+t2 dim: (6, 6, 6, 6)
+op list: [6, 10, 2, 4] amp key: 2.1617343652546368e-05
+op list: 6 10 2 4
+t2 dim: (6, 6, 6, 6)
+op list: [8, 10, 2, 4] amp key: 9.7800496870894e-06
+op list: 8 10 2 4
+t2 dim: (6, 6, 6, 6)
+op list: [6, 7, 2, 5] amp key: 0.08094970646837281
+op list: 6 7 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 2, 5] amp key: 3.474073945910367e-05
+op list: 6 9 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 2, 5] amp key: 3.696419749803664e-05
+op list: 6 11 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 2, 5] amp key: -2.456814352150184e-05
+op list: 8 7 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 2, 5] amp key: -1.102887273537517e-05
+op list: 10 7 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 2, 5] amp key: -0.04353932251558656
+op list: 8 9 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 2, 5] amp key: 1.8751088574625367e-05
+op list: 8 11 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 2, 5] amp key: -1.0567789086742122e-05
+op list: 10 9 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 2, 5] amp key: -0.04353649124080356
+op list: 10 11 2 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 7, 4, 3] amp key: 0.08092870885469625
+op list: 6 7 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 4, 3] amp key: -5.0294547280837936e-06
+op list: 6 9 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 4, 3] amp key: -1.7501898735808645e-05
+op list: 6 11 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 4, 3] amp key: 4.28120445163617e-05
+op list: 8 7 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 4, 3] amp key: 3.6780314986673937e-07
+op list: 10 7 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 4, 3] amp key: -0.043584786527192124
+op list: 8 9 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 4, 3] amp key: -2.3941723929227304e-05
+op list: 8 11 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 4, 3] amp key: 3.1273393932364105e-06
+op list: 10 9 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 4, 3] amp key: -0.04360176726880227
+op list: 10 11 4 3
+t2 dim: (6, 6, 6, 6)
+op list: [7, 9, 3, 5] amp key: 1.70807805275099e-06
+op list: 7 9 3 5
+t2 dim: (6, 6, 6, 6)
+op list: [7, 11, 3, 5] amp key: -1.2450584040167946e-05
+op list: 7 11 3 5
+t2 dim: (6, 6, 6, 6)
+op list: [9, 11, 3, 5] amp key: -4.993403615442259e-06
+op list: 9 11 3 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 7, 4, 5] amp key: 0.8107003082887003
+op list: 6 7 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 9, 4, 5] amp key: -1.3505761174833645e-05
+op list: 6 9 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 11, 4, 5] amp key: -6.162348377537103e-06
+op list: 6 11 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 7, 4, 5] amp key: -2.3914819161495012e-05
+op list: 8 7 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 7, 4, 5] amp key: -9.696550342492075e-06
+op list: 10 7 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 9, 4, 5] amp key: 0.06261106568167775
+op list: 8 9 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [8, 11, 4, 5] amp key: 3.506536664942634e-06
+op list: 8 11 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 9, 4, 5] amp key: -9.222293892442066e-06
+op list: 10 9 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [10, 11, 4, 5] amp key: 0.06254923112088345
+op list: 10 11 4 5
+t2 dim: (6, 6, 6, 6)
+op list: [6, 0] amp key: 0.0002663151493504815
+nocc: 6
+operator list t1: [6, 0]
+t1shape: (6, 6)
+op list: [8, 0] amp key: -5.124715612221294e-07
+nocc: 6
+operator list t1: [8, 0]
+t1shape: (6, 6)
+op list: [10, 0] amp key: 6.120186565563132e-07
+nocc: 6
+operator list t1: [10, 0]
+t1shape: (6, 6)
+op list: [7, 1] amp key: 0.0002663151493504815
+nocc: 6
+operator list t1: [7, 1]
+t1shape: (6, 6)
+op list: [9, 1] amp key: -5.124715612221294e-07
+nocc: 6
+operator list t1: [9, 1]
+t1shape: (6, 6)
+op list: [11, 1] amp key: 6.120186565563132e-07
+nocc: 6
+operator list t1: [11, 1]
+t1shape: (6, 6)
+op list: [6, 2] amp key: -0.03342470395123965
+nocc: 6
+operator list t1: [6, 2]
+t1shape: (6, 6)
+op list: [8, 2] amp key: 3.0139907107606646e-06
+nocc: 6
+operator list t1: [8, 2]
+t1shape: (6, 6)
+op list: [10, 2] amp key: 1.835898248811329e-06
+nocc: 6
+operator list t1: [10, 2]
+t1shape: (6, 6)
+op list: [7, 3] amp key: -0.03342470395123965
+nocc: 6
+operator list t1: [7, 3]
+t1shape: (6, 6)
+op list: [9, 3] amp key: 3.0139907107606646e-06
+nocc: 6
+operator list t1: [9, 3]
+t1shape: (6, 6)
+op list: [11, 3] amp key: 1.835898248811329e-06
+nocc: 6
+operator list t1: [11, 3]
+t1shape: (6, 6)
+op list: [6, 4] amp key: 0.22947393247588418
+nocc: 6
+operator list t1: [6, 4]
+t1shape: (6, 6)
+op list: [8, 4] amp key: 2.351411598024013e-05
+nocc: 6
+operator list t1: [8, 4]
+t1shape: (6, 6)
+op list: [10, 4] amp key: 9.139283050926936e-07
+nocc: 6
+operator list t1: [10, 4]
+t1shape: (6, 6)
+op list: [7, 5] amp key: 0.22947393247588418
+nocc: 6
+operator list t1: [7, 5]
+t1shape: (6, 6)
+op list: [9, 5] amp key: 2.351411598024013e-05
+nocc: 6
+operator list t1: [9, 5]
+t1shape: (6, 6)
+op list: [11, 5] amp key: 9.139283050926936e-07
+nocc: 6
+operator list t1: [11, 5]
+t1shape: (6, 6)
+shape of t2: (6, 6, 6, 6)
+
+
+
+
+ ***********************************************
+******** Final perturbative correction for EOM[T]: *********
+
+
+
+
+ ***********************************************
+
+ Term A, h.c. * wnt1c2:  -0.0013342928753105924
+ Term B and C, mixed:  -0.002368801354459844
+ Term D, h.c. * wnc2:  -0.0043586627386251915
+Total, cumulative EOM[T] PT correction:  -0.008061756968395627

@@ -1,8 +1,3 @@
-Active electrons: 6
-Active orbitals: 6
-HF energy: -24.98199867342346
-UCCSD energy: -25.05857908877787
-
 Operator	Amplitude
 ++++++++++++++++++++++++++++++
 6^ 7^ 0 1 	| 0.00044990160846392454

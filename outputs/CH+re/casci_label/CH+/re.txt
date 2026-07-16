@@ -1,0 +1,371 @@
+#INFO: **** input file is /Users/zwu/Desktop/work/bkup/zap/outputs/CH+re/casci_label/CH+/casci_excited_states.py ****
+import numpy as np
+from pyscf import gto, scf, mcscf, fci
+bond_length=[2.1371300000]
+def run_ch_plus_casci_robust(bond_length=2.1371300000):
+    mol = gto.Mole()
+    mol.unit = "B"
+    mol.atom = f'C 0 0 0; H 0 0 {bond_length}'
+    mol.basis = '6-31g'
+    mol.charge = 1
+    mol.spin = 0
+    mol.symmetry = "C2v"  # Enforce C2v symmetry
+    mol.verbose = 4 
+    mol.build()
+
+    mf = scf.RHF(mol)
+    mf.kernel()
+
+    # 6 active orbitals, 6 active electrons
+    ncas = 6
+    nelecas = 6 
+    mc = mcscf.CASCI(mf, ncas, nelecas)
+    mc.frozen = list(range(13,23)) 
+    all_states = []
+
+
+    all_states = []
+    
+    for irrep_name in ['A1', 'B1', 'B2', 'A2']:
+    
+        mc = mcscf.CASCI(mf, ncas, nelecas)
+    
+        mc.fcisolver.wfnsym = irrep_name
+        mc.fcisolver.nroots = 20 
+    
+        try:
+            e_tot, civec = mc.kernel()
+    
+            if np.isscalar(e_tot):
+                e_tot = [e_tot]
+    
+            for energy in e_tot:
+                all_states.append({
+                    'energy': energy,
+                    'c2v_irrep': irrep_name
+                })
+    
+        except Exception as e:
+            print(f"Failed for {irrep_name}: {e}")
+
+
+    sys.exit()
+
+    irrep_labels_c2v = {0: 'A1', 1: 'B1', 2: 'B2', 3: 'A2'}
+
+    for irrep_id, irrep_name in irrep_labels_c2v.items():
+        mc.fcisolver.wfnsym = irrep_id
+        
+        # Start by trying to get up to 30 roots
+        requested_roots = 30
+        success = False
+        
+        while requested_roots > 0 and not success:
+            mc.fcisolver.nroots = requested_roots
+            try:
+                e_tot, civec = mc.kernel()
+                success = True
+                
+                # If only a single root is returned, make it a list
+                if isinstance(e_tot, (float, np.float64)):
+                    e_tot = [e_tot]
+                    
+                for root_idx, energy in enumerate(e_tot):
+                    all_states.append({
+                        'energy': energy,
+                        'c2v_irrep': irrep_name
+                    })
+            except Exception as e:
+                # If it fails due to too many requested roots, lower the count and retry
+                if "Linear dependency" in str(e) or "Too many roots" in str(e) or requested_roots > 1:
+                    requested_roots -= 2  # Step down and retry
+                else:
+                    # If it's a different error or we hit 0, move to the next irrep
+                    break
+
+    # Sort and print results
+    all_states = sorted(all_states, key=lambda s: s['energy'])
+    print(f"\n{'State #':<9}{'Total Energy (Eh)':<22}{'C2v Irrep':<12}{'Assigned Linear Irrep':<15}")
+    print("-" * 60)
+    
+    for idx, state in enumerate(all_states):
+        c2v = state['c2v_irrep']
+        linear_irrep = "1^Sigma+"
+        if c2v in ['B1', 'B2']:
+            linear_irrep = r"1^Pi"
+        elif c2v == 'A2':
+            linear_irrep = r"1^Delta"
+        elif c2v == 'A1':
+            is_delta = any(other['c2v_irrep'] == 'A2' and np.isclose(other['energy'], state['energy'], atol=1e-5) for other in all_states)
+            if is_delta:
+                linear_irrep = r"1^Delta"
+                
+        print(f"{idx+1:<9}{state['energy']:<22.8f}{c2v:<12}{linear_irrep:<15}")
+
+if __name__ == "__main__":
+    run_ch_plus_casci_robust()
+#INFO: ******************** input file end ********************
+
+
+System: uname_result(system='Darwin', node='mac149279', release='25.5.0', version='Darwin Kernel Version 25.5.0: Mon Apr 27 20:41:19 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T8122', machine='arm64')  Threads 1
+Python 3.11.14 (main, Oct 21 2025, 18:27:30) [Clang 20.1.8 ]
+numpy 2.4.2  scipy 1.17.1  h5py 3.16.0
+Date: Fri May 29 08:22:57 2026
+PySCF version 2.12.1
+PySCF path  /Users/zwu/miniconda3/envs/qeom/lib/python3.11/site-packages/pyscf
+
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 2
+[INPUT] num. electrons = 6
+[INPUT] charge = 1
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry C2v subgroup None
+[INPUT] Mole.unit = B
+[INPUT] Symbol           X                Y                Z      unit          X                Y                Z       unit  Magmom
+[INPUT]  1 C      0.000000000000   0.000000000000   0.000000000000 AA    0.000000000000   0.000000000000   0.000000000000 Bohr   0.0
+[INPUT]  2 H      0.000000000000   0.000000000000   1.130920492773 AA    0.000000000000   0.000000000000   2.137130000000 Bohr   0.0
+
+nuclear repulsion = 2.80750352107733
+point group symmetry = Coov, use subgroup C2v
+symmetry origin: [0.         0.         0.30530429]
+symmetry axis x: [1. 0. 0.]
+symmetry axis y: [0. 1. 0.]
+symmetry axis z: [0. 0. 1.]
+num. orbitals of irrep A1 = 7
+num. orbitals of irrep B1 = 2
+num. orbitals of irrep B2 = 2
+number of shells = 7
+number of NR pGTOs = 26
+number of NR cGTOs = 11
+basis = 6-31g
+ecp = {}
+CPU time:         0.42
+
+
+******** <class 'pyscf.scf.hf_symm.SymAdaptedRHF'> ********
+method = SymAdaptedRHF
+initial guess = minao
+damping factor = 0
+level_shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+diis_start_cycle = 1
+diis_space = 8
+diis_damp = 0
+SCF conv_tol = 1e-09
+SCF conv_tol_grad = None
+SCF max_cycles = 50
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = /var/folders/yy/5bdyxkr12tgclq2rr66hj0m00000gp/T/tmpeo4k7pe9
+max_memory 4000 MB (current use 0 MB)
+Freeze 0 electrons in irreps []
+    6 free electrons in irreps A1 B1 B2
+Set gradient conv threshold to 3.16228e-05
+Initial guess from minao.
+init E= -37.9077553484324
+HOMO (A1) = -0.260022571085297  LUMO (B2) = -0.05808913811763
+cycle= 1 E= -37.8015881980953  delta_E= 0.106  |g|= 0.432  |ddm|= 1.19
+HOMO (A1) = -0.937688161271892  LUMO (B2) = -0.441809912827609
+cycle= 2 E= -37.8801248700025  delta_E= -0.0785  |g|= 0.0564  |ddm|= 0.714
+HOMO (A1) = -0.865901153099372  LUMO (B2) = -0.332519355952872
+cycle= 3 E= -37.8812518311467  delta_E= -0.00113  |g|= 0.0143  |ddm|= 0.0817
+HOMO (A1) = -0.865054861398257  LUMO (B2) = -0.329970251845622
+cycle= 4 E= -37.8813714099473  delta_E= -0.00012  |g|= 0.00212  |ddm|= 0.0299
+HOMO (A1) = -0.864974558022852  LUMO (B2) = -0.329791252081566
+cycle= 5 E= -37.8813745331793  delta_E= -3.12e-06  |g|= 0.000121  |ddm|= 0.00521
+HOMO (A1) = -0.864990679219093  LUMO (B2) = -0.329770455452906
+cycle= 6 E= -37.8813745407728  delta_E= -7.59e-09  |g|= 9.94e-06  |ddm|= 0.000323
+HOMO (A1) = -0.864991508086801  LUMO (B2) = -0.329773486968756
+cycle= 7 E= -37.8813745408104  delta_E= -3.76e-11  |g|= 3.43e-07  |ddm|= 3e-05
+HOMO (A1) = -0.86499152371289  LUMO (B2) = -0.329773301178934
+Extra cycle  E= -37.8813745408104  delta_E= -2.84e-14  |g|= 6.65e-08  |ddm|= 9.25e-07
+converged SCF energy = -37.8813745408104
+Symmetries of active orbitals: A1 A1 A1 B1 B2 A1
+Active space CI wfn symmetry = A1
+
+******** <class 'pyscf.mcscf.casci_symm.SymAdaptedCASCI'> ********
+CAS (3e+3e, 6o), ncore = 0, nvir = 5
+natorb = False
+canonicalization = True
+sorting_mo_energy = False
+max_memory 4000 MB (current use 0 MB)
+******** <class 'pyscf.fci.direct_spin1_symm.FCISolver'> ********
+max. cycles = 200
+conv_tol = 1e-08
+davidson only = False
+linear dependence = 1e-12
+level shift = 0.001
+max iter space = 12
+max_memory 4000 MB
+nroots = 20
+pspace_size = 400
+spin = None
+Input CI wfn symmetry = A1
+
+WARN: Mulitple states found in CASCI solver. First state is used to compute the Fock matrix and natural orbitals in active space.
+
+Density matrix diagonal elements [1.99998966 1.96468292 1.93991953 0.04340197 0.04340197 0.00860396]
+CASCI converged
+CASCI state   0  E = -37.9175585595744  E(CI) = -40.7250620806517  S^2 = 0.0000000
+CASCI state   1  E = -37.6349178468900  E(CI) = -40.4424213679673  S^2 = 0.0000000
+CASCI state   2  E = -37.5887924944583  E(CI) = -40.3962960155356  S^2 = 0.0000000
+CASCI state   3  E = -37.4852511945471  E(CI) = -40.2927547156244  S^2 = 2.0000000
+CASCI state   4  E = -37.3977706484172  E(CI) = -40.2052741694946  S^2 = 2.0000000
+CASCI state   5  E = -37.3842858473880  E(CI) = -40.1917893684654  S^2 = 0.0000000
+CASCI state   6  E = -37.3350923684093  E(CI) = -40.1425958894866  S^2 = 2.0000000
+CASCI state   7  E = -37.2505228671285  E(CI) = -40.0580263882058  S^2 = 0.0000000
+CASCI state   8  E = -37.1814148239431  E(CI) = -39.9889183450205  S^2 = 0.0000000
+CASCI state   9  E = -37.1183414366454  E(CI) = -39.9258449577227  S^2 = 2.0000000
+CASCI state  10  E = -37.0394489844160  E(CI) = -39.8469525054933  S^2 = 0.0000000
+CASCI state  11  E = -36.8603751657086  E(CI) = -39.6678786867859  S^2 = 2.0000000
+CASCI state  12  E = -36.8220117361220  E(CI) = -39.6295152571994  S^2 = 0.0000000
+CASCI state  13  E = -36.7894546606174  E(CI) = -39.5969581816947  S^2 = 2.0000000
+CASCI state  14  E = -36.7792318973886  E(CI) = -39.5867354184660  S^2 = 0.0000000
+CASCI state  15  E = -36.7017911160288  E(CI) = -39.5092946371062  S^2 = 0.0000000
+CASCI state  16  E = -36.6823564627158  E(CI) = -39.4898599837931  S^2 = 0.0000000
+CASCI state  17  E = -36.6302528742538  E(CI) = -39.4377563953311  S^2 = 0.0000000
+CASCI state  18  E = -36.4879269481348  E(CI) = -39.2954304692121  S^2 = 2.0000000
+CASCI state  19  E = -36.4820251631193  E(CI) = -39.2895286841966  S^2 = 2.0000000
+Failed for A1: too many values to unpack (expected 2)
+Symmetries of active orbitals: A1 A1 A1 B1 B2 A1
+Active space CI wfn symmetry = B1
+
+******** <class 'pyscf.mcscf.casci_symm.SymAdaptedCASCI'> ********
+CAS (3e+3e, 6o), ncore = 0, nvir = 5
+natorb = False
+canonicalization = True
+sorting_mo_energy = False
+max_memory 4000 MB (current use 0 MB)
+******** <class 'pyscf.fci.direct_spin1_symm.FCISolver'> ********
+max. cycles = 200
+conv_tol = 1e-08
+davidson only = False
+linear dependence = 1e-12
+level shift = 0.001
+max iter space = 12
+max_memory 4000 MB
+nroots = 20
+pspace_size = 400
+spin = None
+Input CI wfn symmetry = B1
+
+WARN: Mulitple states found in CASCI solver. First state is used to compute the Fock matrix and natural orbitals in active space.
+
+Density matrix diagonal elements [1.99999134 1.97479795 1.00109649 1.         0.01690785 0.00720637]
+CASCI converged
+CASCI state   0  E = -37.8701723346780  E(CI) = -40.6776758557553  S^2 = 2.0000000
+CASCI state   1  E = -37.7864483938223  E(CI) = -40.5939519148996  S^2 = 0.0000000
+CASCI state   2  E = -37.5032915240352  E(CI) = -40.3107950451125  S^2 = 2.0000000
+CASCI state   3  E = -37.3533174847625  E(CI) = -40.1608210058398  S^2 = 0.0000000
+CASCI state   4  E = -37.2920072855277  E(CI) = -40.0995108066050  S^2 = 2.0000000
+CASCI state   5  E = -37.2521372075272  E(CI) = -40.0596407286045  S^2 = 0.0000000
+CASCI state   6  E = -37.2075231577421  E(CI) = -40.0150266788194  S^2 = 6.0000000
+CASCI state   7  E = -37.2036426610613  E(CI) = -40.0111461821386  S^2 = 2.0000000
+CASCI state   8  E = -37.0742356871644  E(CI) = -39.8817392082417  S^2 = 2.0000000
+CASCI state   9  E = -37.0570881738005  E(CI) = -39.8645916948778  S^2 = 0.0000000
+CASCI state  10  E = -36.9850030149641  E(CI) = -39.7925065360415  S^2 = 2.0000000
+CASCI state  11  E = -36.9156293977358  E(CI) = -39.7231329188132  S^2 = 0.0000000
+CASCI state  12  E = -36.8767709066286  E(CI) = -39.6842744277059  S^2 = 2.0000000
+CASCI state  13  E = -36.8263219088434  E(CI) = -39.6338254299207  S^2 = 0.0000000
+CASCI state  14  E = -36.7389459102199  E(CI) = -39.5464494312972  S^2 = 2.0000000
+CASCI state  15  E = -36.6251746884168  E(CI) = -39.4326782094941  S^2 = 0.0000000
+CASCI state  16  E = -36.5355362549277  E(CI) = -39.3430397760050  S^2 = 2.0000000
+CASCI state  17  E = -36.4909020628865  E(CI) = -39.2984055839638  S^2 = 0.0000000
+CASCI state  18  E = -36.3091427137226  E(CI) = -39.1166462347999  S^2 = 2.0000000
+CASCI state  19  E = -36.2571686499184  E(CI) = -39.0646721709957  S^2 = 2.0000000
+Failed for B1: too many values to unpack (expected 2)
+Symmetries of active orbitals: A1 A1 A1 B1 B2 A1
+Active space CI wfn symmetry = B2
+
+******** <class 'pyscf.mcscf.casci_symm.SymAdaptedCASCI'> ********
+CAS (3e+3e, 6o), ncore = 0, nvir = 5
+natorb = False
+canonicalization = True
+sorting_mo_energy = False
+max_memory 4000 MB (current use 0 MB)
+******** <class 'pyscf.fci.direct_spin1_symm.FCISolver'> ********
+max. cycles = 200
+conv_tol = 1e-08
+davidson only = False
+linear dependence = 1e-12
+level shift = 0.001
+max iter space = 12
+max_memory 4000 MB
+nroots = 20
+pspace_size = 400
+spin = None
+Input CI wfn symmetry = B2
+
+WARN: Mulitple states found in CASCI solver. First state is used to compute the Fock matrix and natural orbitals in active space.
+
+Density matrix diagonal elements [1.99999134 1.97479795 1.00109649 0.01690785 1.         0.00720637]
+CASCI converged
+CASCI state   0  E = -37.8701723346780  E(CI) = -40.6776758557553  S^2 = 2.0000000
+CASCI state   1  E = -37.7864483938223  E(CI) = -40.5939519148996  S^2 = 0.0000000
+CASCI state   2  E = -37.5032915240351  E(CI) = -40.3107950451124  S^2 = 2.0000000
+CASCI state   3  E = -37.3533174847625  E(CI) = -40.1608210058398  S^2 = 0.0000000
+CASCI state   4  E = -37.2920072855277  E(CI) = -40.0995108066050  S^2 = 2.0000000
+CASCI state   5  E = -37.2521372075271  E(CI) = -40.0596407286045  S^2 = 0.0000000
+CASCI state   6  E = -37.2075231577421  E(CI) = -40.0150266788194  S^2 = 6.0000000
+CASCI state   7  E = -37.2036426610613  E(CI) = -40.0111461821386  S^2 = 2.0000000
+CASCI state   8  E = -37.0742356871644  E(CI) = -39.8817392082418  S^2 = 2.0000000
+CASCI state   9  E = -37.0570881738005  E(CI) = -39.8645916948779  S^2 = 0.0000000
+CASCI state  10  E = -36.9850030149641  E(CI) = -39.7925065360415  S^2 = 2.0000000
+CASCI state  11  E = -36.9156293977358  E(CI) = -39.7231329188132  S^2 = 0.0000000
+CASCI state  12  E = -36.8767709066286  E(CI) = -39.6842744277059  S^2 = 2.0000000
+CASCI state  13  E = -36.8263219088434  E(CI) = -39.6338254299207  S^2 = 0.0000000
+CASCI state  14  E = -36.7389459102199  E(CI) = -39.5464494312972  S^2 = 2.0000000
+CASCI state  15  E = -36.6251746884168  E(CI) = -39.4326782094941  S^2 = 0.0000000
+CASCI state  16  E = -36.5355362549277  E(CI) = -39.3430397760051  S^2 = 2.0000000
+CASCI state  17  E = -36.4909020628865  E(CI) = -39.2984055839638  S^2 = 0.0000000
+CASCI state  18  E = -36.3091427137226  E(CI) = -39.1166462347999  S^2 = 2.0000000
+CASCI state  19  E = -36.2571686499184  E(CI) = -39.0646721709957  S^2 = 2.0000000
+Failed for B2: too many values to unpack (expected 2)
+Symmetries of active orbitals: A1 A1 A1 B1 B2 A1
+Active space CI wfn symmetry = A2
+
+******** <class 'pyscf.mcscf.casci_symm.SymAdaptedCASCI'> ********
+CAS (3e+3e, 6o), ncore = 0, nvir = 5
+natorb = False
+canonicalization = True
+sorting_mo_energy = False
+max_memory 4000 MB (current use 0 MB)
+******** <class 'pyscf.fci.direct_spin1_symm.FCISolver'> ********
+max. cycles = 200
+conv_tol = 1e-08
+davidson only = False
+linear dependence = 1e-12
+level shift = 0.001
+max iter space = 12
+max_memory 4000 MB
+nroots = 20
+pspace_size = 400
+spin = None
+Input CI wfn symmetry = A2
+
+WARN: Mulitple states found in CASCI solver. First state is used to compute the Fock matrix and natural orbitals in active space.
+
+Density matrix diagonal elements [1.99998106 1.91377795 0.08110432 1.         1.         0.00513667]
+CASCI converged
+CASCI state   0  E = -37.7091106879392  E(CI) = -40.5166142090165  S^2 = 2.0000000
+CASCI state   1  E = -37.6349178468900  E(CI) = -40.4424213679673  S^2 = 0.0000000
+CASCI state   2  E = -37.5842310225512  E(CI) = -40.3917345436286  S^2 = 6.0000000
+CASCI state   3  E = -37.3977706484173  E(CI) = -40.2052741694946  S^2 = 2.0000000
+CASCI state   4  E = -37.3613335093001  E(CI) = -40.1688370303775  S^2 = 2.0000000
+CASCI state   5  E = -37.2671847391962  E(CI) = -40.0746882602736  S^2 = 2.0000000
+CASCI state   6  E = -37.2505228671286  E(CI) = -40.0580263882059  S^2 = 0.0000000
+CASCI state   7  E = -37.1951349281957  E(CI) = -40.0026384492730  S^2 = 0.0000000
+CASCI state   8  E = -37.0146595115890  E(CI) = -39.8221630326664  S^2 = 6.0000000
+CASCI state   9  E = -36.9435227665305  E(CI) = -39.7510262876078  S^2 = 2.0000000
+CASCI state  10  E = -36.8603751657085  E(CI) = -39.6678786867859  S^2 = 2.0000000
+CASCI state  11  E = -36.8220117361220  E(CI) = -39.6295152571994  S^2 = 0.0000000
+CASCI state  12  E = -36.8064891455703  E(CI) = -39.6139926666477  S^2 = 2.0000000
+CASCI state  13  E = -36.7433689099110  E(CI) = -39.5508724309883  S^2 = 0.0000000
+CASCI state  14  E = -36.7125329398165  E(CI) = -39.5200364608938  S^2 = 2.0000000
+CASCI state  15  E = -36.7017911160288  E(CI) = -39.5092946371061  S^2 = 0.0000000
+CASCI state  16  E = -36.5939101978753  E(CI) = -39.4014137189526  S^2 = 6.0000000
+CASCI state  17  E = -36.4880912873777  E(CI) = -39.2955948084550  S^2 = 2.0000000
+CASCI state  18  E = -36.4820251631193  E(CI) = -39.2895286841966  S^2 = 2.0000000
+CASCI state  19  E = -36.3955909694650  E(CI) = -39.2030944905423  S^2 = 0.0000000
+Failed for A2: too many values to unpack (expected 2)

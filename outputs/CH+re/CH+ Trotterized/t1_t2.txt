@@ -1,8 +1,11 @@
+<<<<<<< Updated upstream
 Active electrons: 6
 Active orbitals: 6
 HF energy: -37.88137454081032
 UCCSD energy: -37.917484580140616
 
+=======
+>>>>>>> Stashed changes
 Operator	Amplitude
 ++++++++++++++++++++++++++++++
 6^ 7^ 0 1 	| 0.0008397357023823116

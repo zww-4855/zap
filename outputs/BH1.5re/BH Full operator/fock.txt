@@ -1,8 +1,3 @@
-Basis set: 6-31g
-Geometry (bohr):
-  B  0.0000000000  0.0000000000  0.0000000000
-  H  0.0000000000  0.0000000000  3.4933500000
-
 Number of spatial orbitals: 6
 Number of occupied orbitals: 3
 Number of virtual orbitals: 3
