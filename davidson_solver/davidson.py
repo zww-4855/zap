@@ -375,12 +375,11 @@ if __name__ == "__main__":
     #D3C3 = D3C3_WC1T2 + D3C3_WC2
     #C3 = copy.deepcopy(D3C3) * D3 
     # all tamps, C vectors are in (o,o,v,v) order
-    #tmp=D3C3_WC2*D3D3C3_WC2stat = (1/36.0)*np.einsum("ijkabc,abcijk->",D3C3_WC2,tmp.transpose(3,4,5,0,1,2),optimize="optimal")
+    #EOM [T-6] energy correction diagram A: 
     #
     D2R2_eff = pr3.drive_R2_projection(W,o,v,expanded_r1,expanded_r2,t2amps,D3)
     D2T2_capped_E = 0.25*np.einsum('jiab,abji',D2R2_eff, expanded_r2.transpose(2,3,0,1))
 
-    print("EOM [T-6] energy correction D2T2_capped_E:",D2T2_capped_E)
 
     # this function calls all of R3-> R1 functionality
     D1R1_eff =  pr3.drive_R1_projection(W,o,v,expanded_r1,expanded_r2,t2amps,D3)

@@ -72,7 +72,9 @@ def drive_R1_projection(W,o,v,C1,C2,T2,D3):
 
 def build_WnC1T2_to_R1(W,o,v,C1,C2,T2,D3):
     # build the R1 residual associated with the W*C1*T2 term in the EOM energy expression
-    C3_eff = build_WnC1T2_to_T3(W,o,v,C1,T2,D3)
+    #C3_eff = build_WnC1T2_to_T3(W,o,v,C1,T2,D3)
+    D3C3_WC1T2 = br3.build_WnC1T2_to_T3(W,o,v,C1,T2)
+    C3_eff =  copy.deepcopy(D3C3_WC1T2) * D3
     D1R1_eff = br3.build_T2dagWT3_to_D1R1eff(T2, W, C3_eff, o, v)
 
     # Now project WC3 -> C3
@@ -116,6 +118,8 @@ def build_sqr_brak_T3(W,o,v,eom_r2,D3):
     #tmp= (1/36.0)*np.einsum("ijkabc,abcijk->",eom_r3eff,D3T3.transpose(3,4,5,0,1,2),optimize="optimal")
     #print("EOM [T-6] sqrbrakT diagram D: ",tmp)
     return eom_r3eff
+  
+
 
 def build_WnC1T2_to_T3(W,o,v,C1,T2,D3):
     # build the second order T3 residual from W and C1T2
