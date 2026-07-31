@@ -271,41 +271,26 @@ def davidson(
 if __name__ == "__main__":
 
     np.random.seed(7)
-
-    # ------------------------------------------------------------
-    # Example: construct a Hermitian matrix with known structure
-    # ------------------------------------------------------------
-    #n = 200
-
-    #diagonal = np.linspace(0.0, 50.0, n)
-    #A = np.diag(diagonal)
-
-    # Add a small dense Hermitian perturbation
-    #X = np.random.randn(n, n)
-    #perturbation = 0.05 * (X + X.T)
-
-    #A = A + perturbation
-
     # Load matrix representing CH+ molecule
     re_path = "/Users/zwu/Desktop/work/iterative_EOM/CH_Hbars/re_full.txt"
     import read_info as ri
     Hbar = ri.read_Hbar_matrix_from_txt(re_path, dim=117, dtype=float)
     E_uccsd = -37.9174827003253  # example ground-state UCCSD energy
-
     Hbar_shifted = ri.subtract_ground_state_energy_from_diagonal(
         Hbar,
         E_uccsd,
     )
     Hbar = Hbar_shifted
+
     # ------------------------------------------------------------
     # Davidson diagonalization
     # ------------------------------------------------------------
     evals_davidson, evecs_davidson, res = davidson(
         Hbar,
-        n_roots=4,
-        max_iter=100,
-        max_subspace=30,
-        tol=1e-10,
+        n_roots=15,
+        max_iter=10000,
+        max_subspace=60,
+        tol=1e-12,
         diag=np.diag(Hbar),
         verbose=True,
     )
@@ -351,6 +336,38 @@ if __name__ == "__main__":
     )
 
     inputs.print_summary()
+    print("Davidson evals: ", evals_davidson)
+    sys.exit()
+    for root_num in range(0,25):
+        root = root_num
+        omega = float(np.real(evals_davidson[root]))
+        D3 = hbd.build_d3_for_root(
+            inputs,
+            omega=omega,
+            level_shift=0.0,
+        )
+        import dash_helper as dh
+        r1 = dh.expand_r1(evecs_davidson[:18, root],inputs.nocc, inputs.nvirt)
+        r1, r2 = dh.parse_davidson_eigenvector_to_r1_r2(
+            r1=evecs_davidson[:18, root], 
+            r2=evecs_davidson[18:, root],
+            nocc=inputs.nocc,
+            nvirt=inputs.nvirt
+        )
+        expanded_r1 = r1#dh.expand_r1(r1, nocc=6, nvirt=6)
+        expanded_r2 = r2#dh.expand_r2(r2, nocc=6, nvirt=6)
+
+        import build_R3 as br3
+        import copy
+        import projection_R3 as pr3
+        W = inputs.tei
+        D2R2_eff = pr3.drive_R2_projection(W,inputs.o,inputs.v,expanded_r1,expanded_r2,inputs.t2amps,D3)
+        D2T2_capped_E = 0.25*np.einsum('jiab,abji',D2R2_eff, expanded_r2.transpose(2,3,0,1))
+        print("Root num:", root, "capped E (eV):",(D2T2_capped_E+omega)*27.2114)
+        print("\n")
+
+
+    sys.exit()
 
     #print(inputs.nocc)
     #print(inputs.nvirt)
