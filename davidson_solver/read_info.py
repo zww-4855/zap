@@ -202,18 +202,97 @@ def mp2_energy(nocc,nvirt,mo_energies,tei):
     mp2E=0.250000000000000 * np.einsum('jiab,abji',tei[o, o, v, v], t2)
     return mp2E
 
-def D3denomSlow(epsaa,occ_aa,virt_aa,n):
-    D3 = 1.0/(
-            -epsaa[virt_aa,n,n,n,n,n]
-            -epsaa[n,virt_aa,n,n,n,n]
-            -epsaa[n,n,virt_aa,n,n,n]
-            +epsaa[n,n,n,occ_aa,n,n]
-            +epsaa[n,n,n,n,occ_aa,n]
-            +epsaa[n,n,n,n,n,occ_aa] )
-    D3=D3.transpose(3,4,5,0,1,2)
-    print("shapes:",np.shape(D3),occ_aa,virt_aa,n,epsaa,np.shape(epsaa))
-    #sys.exit()
-    return D3
+
+
+
+def build_inverse_d3_denominator(
+    spin_orbital_energies,
+    occupied,
+    virtual,
+    omega=0.0,
+    level_shift=0.0,
+    zero_tolerance=1.0e-12,
+):
+    """
+    Construct the root-dependent inverse triples denominator.
+
+    The returned tensor is
+
+        D3_inv[i,j,k,a,b,c]
+          =
+        1 / (
+              eps_i + eps_j + eps_k
+            - eps_a - eps_b - eps_c
+            + omega
+            + level_shift
+        )
+
+    Parameters
+    ----------
+    spin_orbital_energies : ndarray, shape (nocc + nvirt,)
+        Spin-orbital energies.
+
+    occupied : slice or array-like
+        Occupied spin-orbital selector.
+
+    virtual : slice or array-like
+        Virtual spin-orbital selector.
+
+    omega : float
+        Current EOM-UCCSD Ritz excitation energy.
+
+    level_shift : float
+        Optional denominator level shift.
+
+    zero_tolerance : float
+        Raise an exception when a denominator has magnitude below this value.
+
+    Returns
+    -------
+    d3_inverse : ndarray
+        Tensor with ordering (i, j, k, a, b, c).
+    """
+
+    eps = np.asarray(spin_orbital_energies, dtype=float)
+
+    if eps.ndim != 1:
+        raise ValueError(
+            "spin_orbital_energies must be one-dimensional; "
+            f"got shape {eps.shape}."
+        )
+
+    eps_occ = eps[occupied]
+    eps_virt = eps[virtual]
+
+    omega = float(omega)
+    level_shift = float(level_shift)
+
+    denominator = (
+        eps_occ[:, None, None, None, None, None]
+        + eps_occ[None, :, None, None, None, None]
+        + eps_occ[None, None, :, None, None, None]
+        - eps_virt[None, None, None, :, None, None]
+        - eps_virt[None, None, None, None, :, None]
+        - eps_virt[None, None, None, None, None, :]
+        + omega
+        + level_shift
+    )
+
+    minimum_magnitude = np.min(np.abs(denominator))
+
+    if minimum_magnitude < zero_tolerance:
+        location = np.unravel_index(
+            np.argmin(np.abs(denominator)),
+            denominator.shape,
+        )
+
+        raise ZeroDivisionError(
+            "A triples denominator is too close to zero. "
+            f"Minimum magnitude = {minimum_magnitude:.3e} at "
+            f"(i,j,k,a,b,c) = {location}. Consider using a level shift."
+        )
+
+    return 1.0 / denominator
 
 
 

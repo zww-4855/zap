@@ -326,12 +326,52 @@ if __name__ == "__main__":
     print(evecs_davidson[18:, :1])
     #print("\nAbsolute errors:")
     #print(np.abs(evals_davidson - evals_exact[:4]))
-    sys.exit()
+    #sys.exit()
     
     
     import run_test as rt
-    nocc,nvirt,tei,t2amps,t1amps,D3,o,v,mo_energies = rt.helper()
-    print('size of t2: ',np.shape(t2amps))
+    #nocc,nvirt,tei,t2amps,t1amps,D3,o,v,mo_energies = rt.helper()
+    #print('size of t2: ',np.shape(t2amps))
+
+
+    import harvest_base_data as hbd
+    inputs = hbd.EOMUCCSDInputData(
+        fock_file=(
+            "/Users/zwu/Desktop/work/bkup/zap/outputs/"
+            "CH+re/CH+ Full operator/fock.txt"
+        ),
+        tei_file=(
+            "/Users/zwu/Desktop/work/bkup/zap/outputs/"
+            "CH+re/CH+ Full operator/two_elec.txt"
+        ),
+        amplitudes_file=(
+            "/Users/zwu/Desktop/work/bkup/zap/outputs/"
+            "CH+re/CH+ Full operator/t1_t2.txt"
+        ),
+    )
+
+    inputs.print_summary()
+
+    #print(inputs.nocc)
+    #print(inputs.nvirt)
+    #print(inputs.mo_energies)
+    #print(inputs.oei)
+    #print(inputs.tei)
+    #print(inputs.t1amps)
+    #print(inputs.t2amps)
+
+    #sys.exit()
+    root = 0
+    theta = evals_davidson
+    omega = float(np.real(theta[root]))
+    D3 = hbd.build_d3_for_root(
+        inputs,
+        omega=omega,
+        level_shift=0.0,
+    )
+
+    print("Current omega:", omega)
+    print("D3 shape:", D3.shape)
 
 
     # I need to be able to expand the R1 and R2 pieces of the Davidson eigenvector into the full tensors. T
@@ -339,33 +379,29 @@ if __name__ == "__main__":
     # This block of code will also test the opposite operation: reducing the expanded R1 and R2 tensors back to the original Davidson eigenvector pieces.
     import dash_helper as dh
     print("r1:",evecs_davidson[:18, 0])
-    r1 = dh.expand_r1(evecs_davidson[:18, 0],nocc, nvirt)
+    r1 = dh.expand_r1(evecs_davidson[:18, 0],inputs.nocc, inputs.nvirt)
     root = 0
     r1, r2 = dh.parse_davidson_eigenvector_to_r1_r2(
         r1=evecs_davidson[:18, root], 
         r2=evecs_davidson[18:, root],
-        nocc=nocc,
-        nvirt=nvirt
+        nocc=inputs.nocc,
+        nvirt=inputs.nvirt
     )
 
     print("Testing expanded -> reduced r1")
     small_r1_original = evecs_davidson[:18, root]
-
     expanded_r1 = dh.expand_r1(small_r1_original, nocc=6, nvirt=6)
-
     small_r1_recovered = dh.reduce_r1(expanded_r1, nocc=6, nvirt=6)
-
     print(np.allclose(small_r1_original, small_r1_recovered))
 
     print("Testing expanded -> reduced r2")
     small_r2_original = evecs_davidson[18:, root]
-
     expanded_r2 = dh.expand_r2(small_r2_original, nocc=6, nvirt=6)
-
     small_r2_recovered = dh.reduce_r2(expanded_r2, nocc=6, nvirt=6)
-
     print("Testing expanded -> reduced r2:")
     print(np.allclose(small_r2_original, small_r2_recovered))
+
+
     # ------------------------------------------------------------
     # ------------------------------------------------------------
     # ------------------------------------------------------------
@@ -376,14 +412,11 @@ if __name__ == "__main__":
     import projection_R3 as pr3
 
 
-    W = tei
-    D2R2_eff = pr3.drive_R2_projection(W,o,v,expanded_r1,expanded_r2,t2amps,D3)
+    W = inputs.tei
+
+
+    D2R2_eff = pr3.drive_R2_projection(W,inputs.o,inputs.v,expanded_r1,expanded_r2,inputs.t2amps,D3)
     D2T2_capped_E = 0.25*np.einsum('jiab,abji',D2R2_eff, expanded_r2.transpose(2,3,0,1))
-
-
-    # this function calls all of R3-> R1 functionality
-    D1R1_eff =  pr3.drive_R1_projection(W,o,v,expanded_r1,expanded_r2,t2amps,D3)
-    top_dias = np.einsum("ia,jb->",D1R1_eff,expanded_r1.transpose(1,0),optimize="optimal")
-    print("EOM [T-6] energy correction from R3->R1 projection:",top_dias)
-
+    print("capped E:",D2T2_capped_E)
+    sys.exit()
 
