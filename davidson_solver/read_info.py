@@ -75,6 +75,45 @@ def read_Hbar_matrix_from_txt(
     return A
 
 
+def subtract_ground_state_energy_from_diagonal(Hbar, E_uccsd, copy=True):
+    """
+    Subtract the ground-state UCCSD energy from the diagonal elements of Hbar.
+
+    This performs
+
+        Hbar_shifted = Hbar - E_uccsd * I
+
+    Parameters
+    ----------
+    Hbar : ndarray
+        Effective Hamiltonian matrix.
+
+    E_uccsd : float
+        Ground-state UCCSD energy.
+
+    copy : bool
+        If True, return a shifted copy of Hbar.
+        If False, modify Hbar in place.
+
+    Returns
+    -------
+    Hbar_shifted : ndarray
+        Matrix whose diagonal has been shifted by -E_uccsd.
+    """
+
+    Hbar = np.array(Hbar, copy=copy)
+
+    if Hbar.ndim != 2 or Hbar.shape[0] != Hbar.shape[1]:
+        raise ValueError(f"Hbar must be a square matrix. Got shape {Hbar.shape}.")
+
+    E_uccsd = float(E_uccsd)
+
+    diag_idx = np.diag_indices_from(Hbar)
+    Hbar[diag_idx] -= E_uccsd
+
+    return Hbar
+
+
 
 def read_tei(tei_infile,dim):
     """

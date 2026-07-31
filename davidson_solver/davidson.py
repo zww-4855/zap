@@ -290,6 +290,13 @@ if __name__ == "__main__":
     re_path = "/Users/zwu/Desktop/work/iterative_EOM/CH_Hbars/re_full.txt"
     import read_info as ri
     Hbar = ri.read_Hbar_matrix_from_txt(re_path, dim=117, dtype=float)
+    E_uccsd = -37.9174827003253  # example ground-state UCCSD energy
+
+    Hbar_shifted = ri.subtract_ground_state_energy_from_diagonal(
+        Hbar,
+        E_uccsd,
+    )
+    Hbar = Hbar_shifted
     # ------------------------------------------------------------
     # Davidson diagonalization
     # ------------------------------------------------------------
@@ -319,7 +326,7 @@ if __name__ == "__main__":
     print(evecs_davidson[18:, :1])
     #print("\nAbsolute errors:")
     #print(np.abs(evals_davidson - evals_exact[:4]))
-    #sys.exit()
+    sys.exit()
     
     
     import run_test as rt
@@ -363,20 +370,13 @@ if __name__ == "__main__":
     # ------------------------------------------------------------
     # ------------------------------------------------------------
     # ------------------------------------------------------------
-    # Now, test this by performing the [T-6] energy correction before I do the projection of R3 back into R2/R1
+    # Now, test this by performing the [T] energy correction before I do the projection of R3 back into R2/R1
     import build_R3 as br3
     import copy
     import projection_R3 as pr3
 
 
     W = tei
-    #D3C3_WC1T2, D3C3_WC2 = br3.build_eom_sqrbrakT_resid(W,t2amps,expanded_r1,expanded_r2,o,v)
-    
-    #D3C3 = D3C3_WC1T2 + D3C3_WC2
-    #C3 = copy.deepcopy(D3C3) * D3 
-    # all tamps, C vectors are in (o,o,v,v) order
-    #EOM [T-6] energy correction diagram A: 
-    #
     D2R2_eff = pr3.drive_R2_projection(W,o,v,expanded_r1,expanded_r2,t2amps,D3)
     D2T2_capped_E = 0.25*np.einsum('jiab,abji',D2R2_eff, expanded_r2.transpose(2,3,0,1))
 
